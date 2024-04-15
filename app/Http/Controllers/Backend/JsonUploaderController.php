@@ -63,9 +63,9 @@ class JsonUploaderController extends Controller
             $fileName = pathinfo($file->file_name, PATHINFO_FILENAME);
 
             //it store the file in inside storage/app/
-            Excel::queue(new UserJsonExport($jsonData,$fileName), $fileName . '_report.xlsx');
+            // Excel::queue(new UserJsonExport($jsonData,$fileName), $fileName . '_report.xlsx');
 
-            // return Excel::download(new UserJsonExport($jsonData, $fileName), $fileName . '.xlsx');
+            return Excel::download(new UserJsonExport($jsonData, $fileName), $fileName . '.xlsx');
 
             return redirect()->back()->with('success','Downloaded...');
 
