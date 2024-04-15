@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Exports\UserJsonExport;
 use App\Jobs\ExportToJson;
 use App\Models\JsonUploader;
 use Illuminate\Http\Request;
+use App\Exports\UserJsonExport;
 use App\Services\JsonFileUploader;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 
 class JsonUploaderController extends Controller
@@ -56,30 +57,34 @@ class JsonUploaderController extends Controller
         ExportToJson::dispatch($jsonData, $fileName);
     }
 
-    public function Download($id){
-        {
+    public function Download($id)
+    { {
             // try {
-                $file = JsonUploader::find($id);
+            $file = JsonUploader::find($id);
 
-                if (!$file) {
-                    return response()->json(['error' => 'File not found'], 404);
-                }
+            if (!$file) {
+                return response()->json(['error' => 'File not found'], 404);
+            }
 
-                // Check if file exists and is readable
-                if (!is_readable($file->file_path)) {
-                    return response()->json(['error' => 'File is not readable'], 500);
-                }
+            // Check if file exists and is readable
+            if (!is_readable($file->file_path)) {
+                return response()->json(['error' => 'File is not readable'], 500);
+            }
 
-                $jsonData = json_decode(file_get_contents($file->file_path), true);
-                // $jsonData = array_slice($jsonData, 0, 20);
-                                $fileName = pathinfo($file->file_name, PATHINFO_FILENAME);
+            $jsonData = json_decode(file_get_contents($file->file_path), true);
+            // $jsonData = array_slice($jsonData, 0, 20);
+            $fileName = pathinfo($file->file_name, PATHINFO_FILENAME);
+            Excel::queue(new UserJsonExport($jsonData,$fileName), $fileName . '_report.xlsx');
 
-                // (new UserJsonExport($jsonData, $fileName))->queue('ddddd.xlsx');
-                        // return response()->json(['success' => 'File download started'], 200);
-                        // return redirect()->back();
-                // Dispatch the job to export to Excel
+            // return Excel::download(new UserJsonExport($jsonData, $fileName), $fileName . '.xlsx');
 
-                ExportToJson::dispatch($jsonData, $fileName);
+            // (new UserJsonExport($jsonData, $fileName))->queue($fileName . '.xlsx');
+            return redirect()->back();
+            // return response()->json(['success' => 'File download started'], 200);
+            // return redirect()->back();
+            // Dispatch the job to export to Excel
+
+            ExportToJson::dispatch($jsonData, $fileName);
 
 
             // } catch (\Exception $e) {

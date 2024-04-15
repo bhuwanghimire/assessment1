@@ -42,8 +42,12 @@
             <x-primary-button class="ms-3">
                 {{ __('Log in') }}
             </x-primary-button>
+            <i class="fab fa-twitter"></i>
 
-            <a href="{{route('provider_redirect','github')}}">Github Login</a>
+        </div>
+        <div>
+            <a href="{{route('provider_redirect','github')}}">Login With Github </a>
+
         </div>
     </form>
 </x-guest-layout>

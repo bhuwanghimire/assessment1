@@ -12,6 +12,8 @@ class JsonFileUploader
     {
         DB::beginTransaction();
         try {
+
+            //object of jsonuploader
             $obj = new JsonUploader();
             $fileName = time() . '_' . $data->getClientOriginalName();
             $filePath = $data->storeAs('uploads', $fileName, 'public');
