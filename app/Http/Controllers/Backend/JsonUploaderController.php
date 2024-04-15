@@ -42,24 +42,11 @@ class JsonUploaderController extends Controller
         }
     }
 
-    public function Downloads($id)
-    {
 
-        $file = JsonUploader::find($id);
-
-        // path is like this http://127.0.0.1:8000/storage/uploads/1713004128_users.json contain large data set
-
-        $jsonData = json_decode(file_get_contents($file->file_path), true);
-        $fileName = pathinfo($file->file_name, PATHINFO_FILENAME);
-
-
-        // Dispatch the job to export to Excel
-        ExportToJson::dispatch($jsonData, $fileName);
-    }
 
     public function Download($id)
-    { {
-            // try {
+    {
+            try {
             $file = JsonUploader::find($id);
 
             if (!$file) {
@@ -74,23 +61,18 @@ class JsonUploaderController extends Controller
             $jsonData = json_decode(file_get_contents($file->file_path), true);
             // $jsonData = array_slice($jsonData, 0, 20);
             $fileName = pathinfo($file->file_name, PATHINFO_FILENAME);
+
+            //it store the file in inside storage/app/
             Excel::queue(new UserJsonExport($jsonData,$fileName), $fileName . '_report.xlsx');
 
             // return Excel::download(new UserJsonExport($jsonData, $fileName), $fileName . '.xlsx');
 
-            // (new UserJsonExport($jsonData, $fileName))->queue($fileName . '.xlsx');
-            return redirect()->back();
-            // return response()->json(['success' => 'File download started'], 200);
-            // return redirect()->back();
-            // Dispatch the job to export to Excel
+            return redirect()->back()->with('success','Downloaded...');
 
-            ExportToJson::dispatch($jsonData, $fileName);
+            } catch (\Exception $e) {
+                \Log::error('Error downloading file: ' . $e->getMessage());
+                return response()->json(['error' => 'Internal Server Error'], 500);
+            }
 
-
-            // } catch (\Exception $e) {
-            //     \Log::error('Error downloading file: ' . $e->getMessage());
-            //     return response()->json(['error' => 'Internal Server Error'], 500);
-            // }
-        }
     }
 }
